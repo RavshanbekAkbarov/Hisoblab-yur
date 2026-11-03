@@ -1,0 +1,231 @@
+:root {
+  --green: #0f5132;
+  --green2: #1f8a5b;
+  --red: #e5484d;
+  --text: #1c2430;
+  --muted: #7a8494;
+  --bg: #f2f4f7;
+  --card: #fff;
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding-bottom: 96px;
+}
+
+main { padding: 0 14px; }
+.tab { display: none; animation: fade .25s ease; }
+.tab.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+
+/* ===== Hero (asosiy sahifa tepasi) ===== */
+.hero {
+  margin: 0 -14px 14px;
+  padding: calc(18px + env(safe-area-inset-top)) 20px 22px;
+  background: linear-gradient(140deg, var(--green), var(--green2));
+  color: #fff;
+  border-radius: 0 0 28px 28px;
+}
+.hero-top { display: flex; justify-content: space-between; align-items: center; }
+.hero-top small { opacity: .8; }
+.hero h1 { font-size: 22px; white-space: nowrap; }
+.month-pill {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  color-scheme: dark;
+  width: 150px;
+  margin: 0 0 0 10px;
+}
+.balance { margin: 22px 0 18px; }
+.balance span { opacity: .8; font-size: 14px; }
+.balance b { display: block; font-size: 32px; letter-spacing: -.5px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.stat small { display: block; opacity: .8; font-size: 12px; }
+.stat b { font-size: 14px; }
+.stat-ico {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 700;
+}
+.stat-ico.in { background: #d1fadf; color: #067647; }
+.stat-ico.out { background: #fee4e2; color: #b42318; }
+
+/* ===== Umumiy kartalar ===== */
+.page-title { font-size: 24px; padding: calc(22px + env(safe-area-inset-top)) 4px 14px; }
+.box {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(16,24,40,.06);
+}
+.box h2 { font-size: 16px; margin-bottom: 12px; }
+.muted { color: var(--muted); font-size: 13px; margin: 6px 0 10px; }
+canvas { display: block; margin: 4px auto 16px; }
+
+/* ===== Inputlar va tugmalar ===== */
+input, select, textarea {
+  width: 100%;
+  font: inherit;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border: 1.5px solid #e4e7ec;
+  border-radius: 12px;
+  background: #f9fafb;
+  outline: none;
+}
+input:focus, textarea:focus { border-color: var(--green2); background: #fff; }
+.field { display: block; font-size: 13px; color: var(--muted); }
+.field input { margin-top: 4px; color: var(--text); }
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(140deg, var(--green), var(--green2));
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.btn.ghost { background: #eef1f4; color: var(--text); }
+.row { display: flex; gap: 10px; }
+.row .btn { margin-bottom: 0; }
+
+/* ===== Segment (Xarajat / Daromad) ===== */
+.segment {
+  display: flex;
+  background: #e4e7ec;
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 14px;
+}
+.segment label { flex: 1; }
+.segment input { display: none; }
+.segment span {
+  display: block; text-align: center; padding: 10px;
+  border-radius: 11px; font-weight: 600; color: var(--muted);
+}
+.segment input:checked + span { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.segment.small span { font-size: 14px; padding: 8px; }
+
+.amount-box { text-align: center; }
+.amount-box small { color: var(--muted); }
+.amount-box input {
+  border: none; background: none; text-align: center;
+  font-size: 36px; font-weight: 700; margin: 0; padding: 4px;
+}
+
+/* ===== Kategoriya chiplari ===== */
+.chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.chip input { display: none; }
+.chip span {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 2px;
+  border-radius: 14px;
+  background: #f4f6f8;
+  font-size: 11px;
+  text-align: center;
+  border: 2px solid transparent;
+}
+.chip span i { font-style: normal; font-size: 22px; }
+.chip input:checked + span { border-color: var(--green2); background: #e8f5ee; }
+
+/* ===== Ro'yxatlar ===== */
+.list { list-style: none; padding: 0; }
+.list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.list li + li { border-top: 1px solid #f0f2f5; }
+.list .grow { flex: 1; min-width: 0; }
+.list .grow small { display: block; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon {
+  width: 42px; height: 42px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 20px; flex-shrink: 0;
+}
+.del { width: 28px; height: 28px; border: none; border-radius: 50%; background: #f2f4f7; color: var(--muted); font-size: 14px; }
+.plus { color: #12a150; white-space: nowrap; }
+.minus { color: var(--red); white-space: nowrap; }
+.list li.done .grow, .list li.done b { opacity: .45; text-decoration: line-through; }
+.check { width: 22px; height: 22px; margin: 0; accent-color: var(--green2); }
+.empty { color: var(--muted); text-align: center; padding: 18px 0; }
+
+.legend { list-style: none; padding: 0; }
+.legend li { padding: 8px 0; }
+.legend .line { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.legend .bar { height: 6px; background: #f0f2f5; border-radius: 3px; overflow: hidden; }
+.legend .bar i { display: block; height: 100%; border-radius: 3px; }
+
+.day { font-size: 13px; color: var(--muted); font-weight: 600; margin: 4px 6px 8px; }
+
+/* ===== Qarz plitkalari ===== */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.tile { padding: 16px; border-radius: var(--radius); }
+.tile small { display: block; font-size: 12px; margin-bottom: 6px; opacity: .8; }
+.tile b { font-size: 18px; }
+.tile.red { background: #fee4e2; color: #912018; }
+.tile.green { background: #d1fadf; color: #05603a; }
+
+/* ===== Sozlamalar ===== */
+.time-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; font-size: 15px;
+}
+.time-row input { width: 140px; margin: 4px 0; text-align: center; }
+
+/* ===== Pastki menyu ===== */
+nav {
+  position: fixed; left: 12px; right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; align-items: center;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 8px 24px rgba(16,24,40,.12);
+  padding: 6px;
+}
+nav button {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none;
+  color: #98a2b3; font: inherit; font-size: 11px;
+  padding: 6px 0;
+}
+nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+nav button.active { color: var(--green); }
+nav .fab {
+  flex: 0 0 56px; height: 56px; margin: -26px 6px 0;
+  border-radius: 50%;
+  background: linear-gradient(140deg, var(--green), var(--green2));
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(15,81,50,.4);
+  justify-content: center;
+}
+nav .fab.active { color: #fff; }
+nav .fab svg { width: 26px; height: 26px; stroke-width: 2.5; }
+
+#toast {
+  position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%);
+  background: #1c2430; color: #fff; padding: 10px 18px; border-radius: 20px;
+  font-size: 14px; display: none;
+}
+
+/* ===== Eslatma gaplari ===== */
+.count { float: right; font-size: 13px; color: var(--muted); font-weight: 500; }
+.msg-form { display: flex; gap: 8px; margin-top: 10px; }
+.msg-form input { margin: 0; }
+.msg-form .btn { width: 52px; flex-shrink: 0; margin: 0; font-size: 22px; padding: 0; }
+.msg-form :disabled { opacity: .5; }
