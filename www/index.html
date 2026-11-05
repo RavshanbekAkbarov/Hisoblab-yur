@@ -49,7 +49,7 @@
 
     <!-- QO'SHISH -->
     <section id="add" class="tab">
-      <h1 class="page-title">Yangi yozuv</h1>
+      <h1 class="page-title" id="addTitle">Yangi yozuv</h1>
       <form id="addForm">
         <div class="segment">
           <label><input type="radio" name="type" value="expense" checked><span>Xarajat</span></label>
@@ -57,8 +57,12 @@
         </div>
 
         <div class="box amount-box">
-          <small>Summa</small>
-          <input id="amount" type="number" inputmode="decimal" step="any" min="0" placeholder="0" required>
+          <small>Summa (minglarda)</small>
+          <div class="amount-wrap">
+            <input id="amount" type="number" inputmode="decimal" step="any" min="0" placeholder="0" required>
+            <span class="zeros">000</span>
+          </div>
+          <small id="amountPreview" class="preview">25 yozsangiz → 25 000</small>
         </div>
 
         <div class="box">
@@ -71,7 +75,8 @@
           <label class="field">Sana<input id="date" type="date" required></label>
         </div>
 
-        <button type="submit" class="btn">Saqlash</button>
+        <button type="submit" class="btn" id="addBtn">Saqlash</button>
+        <button type="button" class="btn ghost" id="cancelEdit" hidden>Bekor qilish</button>
       </form>
     </section>
 
@@ -92,7 +97,10 @@
       <form id="debtForm" class="box">
         <h2>Qarz qo'shish</h2>
         <input id="debtName" placeholder="Kim?" required>
-        <input id="debtAmount" type="number" inputmode="decimal" step="any" min="0" placeholder="Summa" required>
+        <div class="small-wrap">
+          <input id="debtAmount" type="number" inputmode="decimal" step="any" min="0" placeholder="Summa (minglarda)" required>
+          <span class="zeros">000</span>
+        </div>
         <div class="segment small">
           <label><input type="radio" name="debtDir" value="me" checked><span>Men qarzdorman</span></label>
           <label><input type="radio" name="debtDir" value="them"><span>Menga qarzdor</span></label>

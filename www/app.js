@@ -96,16 +96,23 @@ function monthItems() {
 }
 
 // Bitta yozuv qatori (asosiy va tarixda ishlatiladi)
-function itemRow(i, withDelete) {
+function itemRow(i, withButtons) {
   const c = catInfo(i);
   const sign = i.type === 'income' ? '+' : '−';
-  return `<li>
+  return `<li onclick="editItem(${i.id})">
     <span class="icon" style="background:${c.color}22">${c.icon}</span>
     <span class="grow">${i.category}<small>${i.note ? escapeHtml(i.note) : i.date}</small></span>
     <b class="${i.type === 'income' ? 'plus' : 'minus'}">${sign}${money(i.amount)}</b>
-    ${withDelete ? `<button class="del" onclick="removeItem(${i.id})">✕</button>` : ''}
+    ${withButtons ? `
+      <button class="del edit" onclick="event.stopPropagation(); editItem(${i.id})">✎</button>
+      <button class="del" onclick="event.stopPropagation(); removeItem(${i.id})">✕</button>` : ''}
   </li>`;
 }
+
+// Foydalanuvchi "25" yozadi → 25 000 saqlanadi
+const THOUSAND = 1000;
+const toFull = (typed) => Math.round(Number(typed) * THOUSAND);
+const toTyped = (full) => full / THOUSAND;
 
 // ===== Asosiy sahifa =====
 function renderHome() {
@@ -181,25 +188,66 @@ function fillCategories() {
     </label>`).join('');
 }
 
+let editingId = null; // null = yangi yozuv, aks holda tahrirlanayotgan yozuv id'si
+
 $('#addForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  data.items.push({
-    id: Date.now(),
+  const fields = {
     type: currentType(),
-    amount: Number($('#amount').value),
+    amount: toFull($('#amount').value),
     category: document.querySelector('input[name=category]:checked').value,
     note: $('#note').value.trim(),
     date: $('#date').value
-  });
+  };
+  if (editingId) {
+    Object.assign(data.items.find((i) => i.id === editingId), fields);
+  } else {
+    data.items.push({ id: Date.now(), ...fields });
+  }
+  const wasEditing = editingId;
   save();
-  e.target.reset();
-  fillCategories();
-  $('#date').value = today();
+  resetAddForm();
   render();
-  openTab('home');
-  toast('Saqlandi ✓');
+  openTab(wasEditing ? 'history' : 'home');
+  toast(wasEditing ? 'Yangilandi ✓' : 'Saqlandi ✓');
 });
 
+// Yozuvni formaga qaytarib, tahrirlash rejimini yoqadi
+function editItem(id) {
+  const item = data.items.find((i) => i.id === id);
+  editingId = id;
+  openTab('add');
+  document.querySelector(`input[name=type][value=${item.type}]`).checked = true;
+  fillCategories();
+  const chip = document.querySelector(`input[name=category][value="${CSS.escape(item.category)}"]`);
+  if (chip) chip.checked = true;
+  $('#amount').value = toTyped(item.amount);
+  $('#note').value = item.note;
+  $('#date').value = item.date;
+  $('#addTitle').textContent = 'Tahrirlash';
+  $('#addBtn').textContent = 'Yangilash';
+  $('#cancelEdit').hidden = false;
+  updatePreview();
+}
+
+function resetAddForm() {
+  editingId = null;
+  $('#addForm').reset();
+  fillCategories();
+  $('#date').value = today();
+  $('#addTitle').textContent = 'Yangi yozuv';
+  $('#addBtn').textContent = 'Saqlash';
+  $('#cancelEdit').hidden = true;
+  updatePreview();
+}
+
+function updatePreview() {
+  const v = $('#amount').value;
+  $('#amountPreview').textContent = v ? '= ' + money(toFull(v)) : '25 yozsangiz → 25 000';
+}
+
+$('#amount').addEventListener('input', updatePreview);
+$('#cancelEdit').addEventListener('click', () => { resetAddForm(); openTab('history'); });
 document.querySelectorAll('input[name=type]').forEach((r) => r.addEventListener('change', fillCategories));
 
 // ===== Tarix (kunlarga bo'lingan) =====
@@ -251,7 +299,7 @@ $('#debtForm').addEventListener('submit', (e) => {
   data.debts.push({
     id: Date.now(),
     name: $('#debtName').value.trim(),
-    amount: Number($('#debtAmount').value),
+    amount: toFull($('#debtAmount').value),
     dir: document.querySelector('input[name=debtDir]:checked').value,
     done: false
   });
@@ -411,7 +459,10 @@ function openTab(name) {
 }
 
 document.querySelectorAll('nav button').forEach((btn) =>
-  btn.addEventListener('click', () => openTab(btn.dataset.tab))
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'add') resetAddForm(); // "+" har doim yangi yozuv ochadi
+    openTab(btn.dataset.tab);
+  })
 );
 
 // ===== Boshlash =====

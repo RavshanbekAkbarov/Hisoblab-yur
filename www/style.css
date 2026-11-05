@@ -229,3 +229,13 @@ nav .fab svg { width: 26px; height: 26px; stroke-width: 2.5; }
 .msg-form input { margin: 0; }
 .msg-form .btn { width: 52px; flex-shrink: 0; margin: 0; font-size: 22px; padding: 0; }
 .msg-form :disabled { opacity: .5; }
+
+/* ===== Avtomatik "000" ===== */
+.amount-wrap { display: flex; justify-content: center; align-items: baseline; }
+.amount-wrap input { width: auto; max-width: 60%; text-align: right; }
+.zeros { color: #b0b7c3; font-weight: 700; }
+.amount-wrap .zeros { font-size: 36px; }
+.preview { display: block; margin-top: 4px; }
+.small-wrap { position: relative; }
+.small-wrap .zeros { position: absolute; right: 14px; top: 12px; }
+.list .edit { background: #e8f5ee; color: var(--green); }
