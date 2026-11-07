@@ -27,23 +27,25 @@ jobs:
             exit 0
           fi
           W="npx -y wrangler@4"
+          # Xato bo'lsa, sababini GitHub sahifasida ko'rsatadi
+          trap 'echo "::error title=Xato::$(tail -c 1500 out.log | tr "\n" " ")"' ERR
 
           # 1) Obunalar bazasi (KV) — yo'q bo'lsa yaratiladi
-          kv_id() { $W kv namespace list | sed -n '/^\[/,$p' | jq -r '.[] | select(.title=="hisoblab-yur-subs") | .id'; }
+          kv_id() { $W kv namespace list 2>>out.log | tee -a out.log | sed -n '/^\[/,$p' | jq -r '.[] | select(.title=="hisoblab-yur-subs") | .id'; }
           ID=$(kv_id)
           if [ -z "$ID" ]; then
-            $W kv namespace create hisoblab-yur-subs
+            $W kv namespace create hisoblab-yur-subs >>out.log 2>&1
             ID=$(kv_id)
           fi
           sed -i "s/KV_ID/$ID/" wrangler.toml
 
           # 2) Sayt va serverni joylash (manzilni GitHub sahifasida ko'rsatamiz)
-          $W deploy | tee deploy.log
+          $W deploy 2>&1 | tee -a deploy.log out.log
           URL=$(grep -o 'https://[^ ]*workers\.dev' deploy.log | head -1)
           echo "::notice title=Sayt manzili::$URL"
 
           # 3) Eslatma kaliti (VAPID) — faqat birinchi marta yaratiladi
-          if ! $W secret list | grep -q VAPID_JWK; then
+          if ! $W secret list 2>>out.log | grep -q VAPID_JWK; then
             node -e "crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign']).then(k=>crypto.subtle.exportKey('jwk',k.privateKey)).then(j=>process.stdout.write(JSON.stringify(j)))" \
-              | $W secret put VAPID_JWK
+              | $W secret put VAPID_JWK >>out.log 2>&1
           fi
