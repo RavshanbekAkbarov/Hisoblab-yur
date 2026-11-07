@@ -1,0 +1,16 @@
+{
+  "name": "Hisoblab yur",
+  "short_name": "Hisoblab yur",
+  "description": "Xarajat va daromadlarni hisoblab yurish uchun ilova",
+  "lang": "uz",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f4f7",
+  "theme_color": "#0f5132",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

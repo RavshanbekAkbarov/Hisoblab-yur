@@ -1,0 +1,21 @@
+# Cloudflare Worker sozlamasi (sayt + eslatma serveri)
+name = "hisoblab-yur"
+main = "worker/index.js"
+compatibility_date = "2025-06-01"
+
+# www papkasi sayt sifatida tarqatiladi
+[assets]
+directory = "./www"
+binding = "ASSETS"
+
+# Har 5 daqiqada eslatmalarni tekshiradi
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Obunalar shu yerda saqlanadi (ID'ni GitHub Actions o'zi qo'yadi)
+[[kv_namespaces]]
+binding = "SUBS"
+id = "KV_ID"
+
+[vars]
+VAPID_SUBJECT = "https://github.com/RavshanbekAkbarov/Hisoblab-yur"

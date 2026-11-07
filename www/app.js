@@ -323,8 +323,11 @@ function removeDebt(id) {
   renderDebts();
 }
 
-// ===== Eslatmalar (faqat APK ichida ishlaydi) =====
+// ===== Eslatmalar =====
+// APK ichida: telefonning o'zi eslatadi (Local Notifications)
+// Saytda (PWA): server signal yuboradi (Web Push), gapni sw.js tanlaydi
 const Notify = window.Capacitor?.Plugins?.LocalNotifications;
+const isNative = !!Notify;
 
 // Oldingisidan farqli tasodifiy gap tanlaydi
 let lastText = -1;
@@ -337,8 +340,13 @@ function randomText() {
   return list[i];
 }
 
-function refreshReminders() {
-  scheduleReminders().then((text) => ($('#remindStatus').textContent = text));
+function refreshReminders(askPermission = false) {
+  const job = isNative ? scheduleReminders() : syncWebPush(askPermission);
+  job
+    .then((text) => ($('#remindStatus').textContent = text))
+    .catch(() => ($('#remindStatus').textContent = navigator.onLine
+      ? "Eslatmani yoqib bo'lmadi. Birozdan keyin qayta urinib ko'ring."
+      : "Internet yo'q — eslatma sozlamasi keyinroq yangilanadi."));
 }
 
 // ===== Eslatma gaplarini boshqarish =====
@@ -378,7 +386,6 @@ function removeMessage(i) {
 // keyingi 30 kunning har bir vaqtiga alohida eslatma qo'yamiz.
 // Ilova har ochilganda ro'yxat yangilanadi.
 async function scheduleReminders() {
-  if (!Notify) return 'Eslatmalar faqat telefondagi ilovada (APK) ishlaydi.';
   const perm = await Notify.requestPermissions();
   if (perm.display !== 'granted') return 'Bildirishnomaga ruxsat berilmadi.';
 
@@ -406,6 +413,82 @@ async function scheduleReminders() {
   return '✅ Har kuni: ' + data.reminders.join(', ');
 }
 
+// ===== Saytdagi eslatmalar (Web Push) =====
+const canWebPush = !isNative && 'serviceWorker' in navigator && 'PushManager' in window && window.isSecureContext;
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+if (!isNative && 'serviceWorker' in navigator && window.isSecureContext) {
+  navigator.serviceWorker.register('sw.js').catch(() => {}); // masalan, fayl sifatida ochilganda
+}
+
+async function syncWebPush(askPermission) {
+  if (!canWebPush) {
+    $('#pushBtn').hidden = true;
+    return isIOS
+      ? "iPhone'da eslatma uchun: Safari → «Ulashish» → «Bosh ekranga qo'shish», keyin ilovani o'sha yerdan oching."
+      : "Bu brauzer eslatmalarni qo'llamaydi. Chrome'da oching.";
+  }
+  await saveMessagesForSW();
+
+  if (Notification.permission !== 'granted') {
+    if (!askPermission || (await Notification.requestPermission()) !== 'granted') {
+      $('#pushBtn').hidden = false;
+      return Notification.permission === 'denied'
+        ? "Bildirishnoma bloklangan. Brauzer sozlamasidan ruxsat bering."
+        : "Eslatmalar o'chiq. Yoqish uchun tugmani bosing.";
+    }
+  }
+
+  const sub = await getWebSubscription();
+  const res = await fetch('api/subscribe', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ subscription: sub, times: data.reminders, tz: new Date().getTimezoneOffset() })
+  });
+  if (!res.ok) throw new Error('server');
+  $('#pushBtn').hidden = true;
+  return '✅ Har kuni: ' + data.reminders.join(', ');
+}
+
+// Obunani oladi yoki yaratadi; server kaliti o'zgargan bo'lsa, yangidan obuna bo'ladi
+async function getWebSubscription() {
+  const reg = await navigator.serviceWorker.ready;
+  const { key } = await (await fetch('api/key')).json();
+  let sub = await reg.pushManager.getSubscription();
+  if (sub && b64url(sub.options.applicationServerKey) !== key) {
+    await sub.unsubscribe();
+    sub = null;
+  }
+  return sub || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: fromB64url(key) });
+}
+
+// sw.js eslatma gapini shu yerdan o'qiydi
+async function saveMessagesForSW() {
+  const cache = await caches.open('hisob-config');
+  const list = data.messages.length ? data.messages : REMIND_TEXTS;
+  await cache.put(new URL('config/messages', document.baseURI), new Response(JSON.stringify(list)));
+}
+
+const b64url = (buf) =>
+  btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const fromB64url = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+
+$('#pushBtn').addEventListener('click', () => refreshReminders(true));
+
+// ===== Telefonga o'rnatish tugmasi (Android Chrome) =====
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  $('#installBtn').hidden = false;
+});
+$('#installBtn').addEventListener('click', async () => {
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  $('#installBtn').hidden = true;
+});
+
 // ===== Sozlamalar =====
 function renderSettings() {
   document.querySelectorAll('.remind').forEach((inp, i) => (inp.value = data.reminders[i]));
@@ -418,7 +501,7 @@ $('#settingsForm').addEventListener('submit', async (e) => {
   data.currency = $('#currency').value.trim();
   save();
   render();
-  $('#remindStatus').textContent = await scheduleReminders();
+  refreshReminders();
   toast('Saqlandi ✓');
 });
 

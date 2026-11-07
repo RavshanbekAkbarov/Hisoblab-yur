@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0f5132">
   <title>Hisoblab yur</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hisoblab yur">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,6 +39,8 @@
           </div>
         </div>
       </header>
+
+      <button id="installBtn" class="btn" hidden>📲 Telefonga o'rnatish</button>
 
       <div class="box">
         <h2>Oylik xarajatlar</h2>
@@ -120,9 +127,10 @@
       <form id="settingsForm">
         <div class="box">
           <h2>🔔 Kunlik eslatmalar</h2>
-          <label class="time-row">☀️ Ertalab<input type="time" class="remind" required></label>
-          <label class="time-row">🍽️ Tushlik<input type="time" class="remind" required></label>
-          <label class="time-row">🌙 Kechqurun<input type="time" class="remind" required></label>
+          <label class="time-row">☀️ Ertalab<input type="time" class="remind" step="300" required></label>
+          <label class="time-row">🍽️ Tushlik<input type="time" class="remind" step="300" required></label>
+          <label class="time-row">🌙 Kechqurun<input type="time" class="remind" step="300" required></label>
+          <button type="button" id="pushBtn" class="btn" hidden>🔔 Eslatmalarni yoqish</button>
           <p id="remindStatus" class="muted"></p>
         </div>
         <div class="box">
