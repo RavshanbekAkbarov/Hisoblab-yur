@@ -428,8 +428,7 @@ async function syncWebPush(askPermission) {
       ? "iPhone'da eslatma uchun: Safari → «Ulashish» → «Bosh ekranga qo'shish», keyin ilovani o'sha yerdan oching."
       : "Bu brauzer eslatmalarni qo'llamaydi. Chrome'da oching.";
   }
-  await saveMessagesForSW();
-
+  // Ruxsat so'rovi birinchi turadi: iPhone uni faqat tugma bosilgan zahoti qabul qiladi
   if (Notification.permission !== 'granted') {
     if (!askPermission || (await Notification.requestPermission()) !== 'granted') {
       $('#pushBtn').hidden = false;
@@ -438,6 +437,7 @@ async function syncWebPush(askPermission) {
         : "Eslatmalar o'chiq. Yoqish uchun tugmani bosing.";
     }
   }
+  await saveMessagesForSW();
 
   const sub = await getWebSubscription();
   const res = await fetch('api/subscribe', {
@@ -531,6 +531,7 @@ $('#installGo').addEventListener('click', async () => {
 $('#installLater').addEventListener('click', () => {
   localStorage.setItem('installLater', Date.now());
   $('#installSheet').hidden = true;
+  maybeAskNotify();
 });
 $('#installBtn').addEventListener('click', showInstall);
 
@@ -616,3 +617,29 @@ renderSettings();
 renderMessages();
 render();
 refreshReminders();
+
+// ===== Eslatmaga ruxsat so'rash oynasi =====
+// Ilova o'zi oyna chiqaradi; "Yoqish" bosilganda telefonning ruxsat oynasi ochiladi.
+// (Brauzerlar ruxsatni bosishsiz so'rashga yo'l qo'ymaydi.)
+function maybeAskNotify() {
+  if (!canWebPush || Notification.permission !== 'default') return; // allaqachon hal qilingan
+  if (!$('#installSheet').hidden) return; // avval o'rnatish oynasi
+  const later = Number(localStorage.getItem('notifyLater') || 0);
+  if (Date.now() - later < 24 * 60 * 60 * 1000) return; // "Keyinroq"dan keyin 1 kun so'ramaymiz
+  $('#notifySheet').hidden = false;
+}
+
+$('#notifyGo').addEventListener('click', () => {
+  $('#notifySheet').hidden = true;
+  refreshReminders(true);
+  setTimeout(() => {
+    if (Notification.permission === 'granted') toast('Eslatmalar yoqildi 🔔');
+  }, 1500);
+});
+
+$('#notifyLater').addEventListener('click', () => {
+  localStorage.setItem('notifyLater', Date.now());
+  $('#notifySheet').hidden = true;
+});
+
+maybeAskNotify();

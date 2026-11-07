@@ -263,3 +263,5 @@ nav .fab svg { width: 26px; height: 26px; stroke-width: 2.5; }
 .steps ol { padding-left: 20px; }
 .steps li { margin: 8px 0; }
 .steps small { color: var(--muted); }
+
+.sheet-emoji { font-size: 52px; margin-bottom: 6px; }
