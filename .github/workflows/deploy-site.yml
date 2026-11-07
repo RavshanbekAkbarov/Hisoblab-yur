@@ -20,6 +20,15 @@ jobs:
         with:
           node-version: 22
 
+      - name: Kalitlarni tekshirish
+        run: |
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && exit 0
+          api() { curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/$1"; }
+          T=$(api user/tokens/verify | jq -c '{ok: .success, status: .result.status, errors: [.errors[]?.message]}')
+          A=$(api "accounts/$CLOUDFLARE_ACCOUNT_ID" | jq -c '{ok: .success, errors: [.errors[]?.message]}')
+          K=$(api "accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces" | jq -c '{ok: .success, errors: [.errors[]?.message]}')
+          echo "::notice title=Tekshiruv::token=$T account=$A kv=$K idUzunligi=${#CLOUDFLARE_ACCOUNT_ID}"
+
       - name: Cloudflare'ga joylash
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
