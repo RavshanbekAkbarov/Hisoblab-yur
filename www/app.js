@@ -475,19 +475,72 @@ const fromB64url = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g
 
 $('#pushBtn').addEventListener('click', () => refreshReminders(true));
 
-// ===== Telefonga o'rnatish tugmasi (Android Chrome) =====
+// ===== Telefonga o'rnatish =====
+// Android (Chrome, Samsung): tugma bosilsa, telefonning o'z "O'rnatish" oynasi chiqadi.
+// iPhone: Apple saytga o'zi o'rnatishga ruxsat bermaydi, shuning uchun yo'riqnoma ko'rsatamiz.
+const isInstalled = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 let installPrompt = null;
+
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
+  e.preventDefault(); // brauzerning kichik bannerini o'chirib, o'zimiznikini ko'rsatamiz
   installPrompt = e;
-  $('#installBtn').hidden = false;
 });
-$('#installBtn').addEventListener('click', async () => {
-  installPrompt.prompt();
-  await installPrompt.userChoice;
-  installPrompt = null;
+window.addEventListener('appinstalled', () => {
+  hideInstall();
+  toast("O'rnatildi ✓ Bosh ekrandan oching");
+});
+
+const IOS_STEPS = `<ol>
+  <li><b>Ulashish</b> tugmasini bosing ⬆️<br><small>Safari'da pastda (yoki ⋯ ichida), Chrome'da yuqori o'ngda</small></li>
+  <li><b>«Bosh ekranga qo'shish»</b> ni tanlang<br><small>Ko'rinmasa, ro'yxatni pastga suring</small></li>
+  <li>O'ng yuqoridagi <b>«Qo'shish»</b> ni bosing</li>
+</ol>`;
+const MENU_STEPS = `<ol>
+  <li>Brauzer menyusini oching: <b>⋮</b> (yuqori o'ngda)</li>
+  <li><b>«Ilovani o'rnatish»</b> yoki <b>«Bosh ekranga qo'shish»</b> ni tanlang</li>
+</ol>
+<p class="muted">Telegram ichida ochilgan bo'lsa: ⋮ → «Brauzerda ochish», keyin qayta urinib ko'ring.</p>`;
+
+function showInstall() {
+  $('#installSheet').hidden = false;
+  if (isIOS) { // iPhone'da tugma o'rniga darrov yo'riqnoma
+    $('#installSteps').innerHTML = IOS_STEPS;
+    $('#installSteps').hidden = false;
+    $('#installGo').hidden = true;
+    $('#installLater').textContent = 'Tushundim';
+  }
+}
+
+function hideInstall() {
+  $('#installSheet').hidden = true;
   $('#installBtn').hidden = true;
+}
+
+$('#installGo').addEventListener('click', async () => {
+  if (installPrompt) {
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    installPrompt = null;
+    if (outcome === 'accepted') hideInstall();
+  } else { // brauzer avtomatik o'rnatishni qo'llamasa — qo'lda yo'riqnoma
+    $('#installSteps').innerHTML = MENU_STEPS;
+    $('#installSteps').hidden = false;
+  }
 });
+
+$('#installLater').addEventListener('click', () => {
+  localStorage.setItem('installLater', Date.now());
+  $('#installSheet').hidden = true;
+});
+$('#installBtn').addEventListener('click', showInstall);
+
+// O'rnatilmagan bo'lsa: asosiy oynada tugma doim turadi,
+// oyna esa birinchi ochilishda (va "Keyinroq"dan 3 kun o'tgach) o'zi chiqadi
+if (!isNative && !isInstalled) {
+  $('#installBtn').hidden = false;
+  const later = Number(localStorage.getItem('installLater') || 0);
+  if (Date.now() - later > 3 * 24 * 60 * 60 * 1000) showInstall();
+}
 
 // ===== Sozlamalar =====
 function renderSettings() {

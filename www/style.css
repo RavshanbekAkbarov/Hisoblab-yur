@@ -239,3 +239,27 @@ nav .fab svg { width: 26px; height: 26px; stroke-width: 2.5; }
 .small-wrap { position: relative; }
 .small-wrap .zeros { position: absolute; right: 14px; top: 12px; }
 .list .edit { background: #e8f5ee; color: var(--green); }
+
+/* ===== O'rnatish oynasi ===== */
+#installBtn { margin-bottom: 14px; }
+.sheet-bg {
+  position: fixed; inset: 0; z-index: 10;
+  background: rgba(16, 24, 40, .45);
+  display: flex; align-items: flex-end;
+}
+.sheet-bg[hidden] { display: none; }
+.sheet {
+  width: 100%;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px calc(16px + env(safe-area-inset-bottom));
+  text-align: center;
+  animation: up .3s ease;
+}
+@keyframes up { from { transform: translateY(100%); } }
+.sheet-icon { width: 64px; height: 64px; border-radius: 16px; margin-bottom: 10px; }
+.sheet h2 { font-size: 20px; margin-bottom: 4px; }
+.steps { text-align: left; background: #f4f6f8; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+.steps ol { padding-left: 20px; }
+.steps li { margin: 8px 0; }
+.steps small { color: var(--muted); }
