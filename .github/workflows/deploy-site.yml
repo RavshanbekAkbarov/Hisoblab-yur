@@ -37,8 +37,10 @@ jobs:
           fi
           sed -i "s/KV_ID/$ID/" wrangler.toml
 
-          # 2) Sayt va serverni joylash
-          $W deploy
+          # 2) Sayt va serverni joylash (manzilni GitHub sahifasida ko'rsatamiz)
+          $W deploy | tee deploy.log
+          URL=$(grep -o 'https://[^ ]*workers\.dev' deploy.log | head -1)
+          echo "::notice title=Sayt manzili::$URL"
 
           # 3) Eslatma kaliti (VAPID) — faqat birinchi marta yaratiladi
           if ! $W secret list | grep -q VAPID_JWK; then
